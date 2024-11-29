@@ -1,0 +1,36 @@
+{
+  "name": "staff-manager",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "antd": "^3.15.1",
+    "mockjs": "^1.0.1-beta3",
+    "react": "^16.8.4",
+    "react-dom": "^16.8.4",
+    "react-redux": "^7.0.2",
+    "react-scripts": "2.1.8",
+    "redux": "^4.0.1",
+    "redux-thunk": "^2.3.0"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "prebuild-linux": "rm -rf ../back-end/templates",
+    "prebuild": "if exist ..\\back-end\\front-build (rmdir ..\\back-end\\front-build /q/s)",
+    "build": "react-scripts build",
+    "postbuild": "move build ..\\back-end\\front-build",
+    "postbuild-linux": "mv build ../back-end/templates",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "eslintConfig": {
+    "extends": "react-app"
+  },
+  "browserslist": [
+    ">0.2%",
+    "not dead",
+    "not ie <= 11",
+    "not op_mini all"
+  ],
+  "homepage": "./staff-manager/",
+  "proxy": "http://127.0.0.1:5000"
+}
