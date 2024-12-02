@@ -57,6 +57,37 @@ def deleteJob(id):
 
 
 
+##################  Company接口  ###############
+
+@app.route(apiPrefix + 'getCompanyList', methods=['GET'])
+def getCompanyList():
+    return DBUtil.getCompanyList()
+
+@app.route(apiPrefix + 'updateCompany', methods=['POST'])
+def updateCompany():
+    data = request.get_data(as_text=True)
+    re = DBUtil.addOrUpdateCompany(data)
+    return json.dumps(re)
+
+@app.route(apiPrefix + 'deleteCompany/<int:id>', methods=['DELETE'])
+def deleteCompany(id):
+    re = DBUtil.deleteCompany(id)
+    return json.dumps(re)
+
+@app.route(apiPrefix + 'getCompanyDetails/<int:id>', methods=['GET'])
+def getCompanyDetails(id):
+    try:
+        # 调用数据库工具类的方法获取公司详情
+        details = DBUtil.getCompanyDetails(id)
+        if details:
+            return json.dumps({'code': 0, 'data': details}), 200
+        else:
+            return json.dumps({'code': 1, 'message': 'Company not found'}), 404
+    except Exception as e:
+        return json.dumps({'code': -1, 'message': str(e)}), 500
+
+
+
 ##################  Staff接口  ###############
 
 @app.route(apiPrefix + 'getStaffList/<int:job>')

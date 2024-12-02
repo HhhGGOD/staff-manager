@@ -51,5 +51,51 @@ export const updateJob = (job) => (dispatch, getState) => {
         })
 };
 
+export const getcompanies = () => (dispatch, getState) => {
+    dispatch({
+        type: 'get_compgetcompanies_start',
+    });
+    //先去请求数据
+    HttpUtil.get(ApiUtil.API_COMPANY_LIST)
+        .then(
+            companyList => {
+                //请求数据完成后再dispatch
+                dispatch({
+                    type: 'get_compgetcompanies_success',
+                    payload: companyList
+                })
+            }
+        )
+        .catch(e => {
+            console.log(e)
+            dispatch({
+                type: 'get_compgetcompanies_success',
+                payload: e
+            })
+        })
+};
+
+
+
+export const updatecompany = (company) => (dispatch, getState) => {
+    HttpUtil.post(ApiUtil.API_JOB_UPDATE, company)
+        .then(
+            re => {
+                dispatch({
+                    type: 'update_compgetcompanies_success',
+                    payload: company
+                })
+            }
+        )
+        .catch(e => {
+            console.log(e)
+            dispatch({
+                type: 'action_compgetcompanies_fail',
+                payload: e
+            })
+        })
+};
+
 
 export const addJob = () => ({ type: 'addJob' });
+export const addcompany = () => ({ type: 'addcompany' });

@@ -11,6 +11,7 @@ import {
 import StaffList from './staffList';
 import JobList from './jobList';
 import DataManager from './DataManager';
+import Company from './companyList';
 
 
 const {
@@ -34,6 +35,8 @@ class App extends Component {
     if (this.state.currentPage === '2') {
       pageView = <JobList/>;
     } else if (this.state.currentPage === '3') {
+      pageView = <Company/>;
+    } else if (this.state.currentPage === '4') {
       pageView = <DataManager/>;
     } else {
       pageView = <StaffList/>;
@@ -63,6 +66,10 @@ class App extends Component {
               <span>职位管理</span>
             </Menu.Item>
             <Menu.Item key="3">
+              <Icon type="bank" />
+              <span>公司管理</span>
+            </Menu.Item>
+            <Menu.Item key="4">
               <Icon type="database" />
               <span>数据处理</span>
             </Menu.Item>

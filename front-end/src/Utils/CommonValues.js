@@ -4,5 +4,6 @@
  */
 export default class CommonValues {
     static JOBS = [];
+    static COMPANIES = [];
     
 }

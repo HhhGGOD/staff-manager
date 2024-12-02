@@ -6,11 +6,11 @@ CREATE TABLE IF NOT EXISTS `t_job`(
 `name` VARCHAR(40) NOT NULL
 )ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-insert into t_job(name) values("Web前端");
-insert into t_job(name) values("Java后台");
-insert into t_job(name) values("Andorid");
-insert into t_job(name) values("IOS");
-insert into t_job(name) values("测试");
+-- insert into t_job(name) values("Web前端");
+-- insert into t_job(name) values("Java后台");
+-- insert into t_job(name) values("Andorid");
+-- insert into t_job(name) values("IOS");
+-- insert into t_job(name) values("测试");
 
 CREATE TABLE IF NOT EXISTS `t_staff`(
 `id` INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
@@ -30,6 +30,13 @@ CREATE TABLE IF NOT EXISTS `t_staff`(
 `contact_logs` TEXT,
 `create_time` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 `modify_time` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+)ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+CREATE TABLE IF NOT EXISTS `t_companies` (
+`id ` INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
+`name` VARCHAR(40) NOT NULL,
+`detail` TEXT
 )ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
