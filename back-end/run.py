@@ -67,12 +67,13 @@ def getCompanyList():
 def updateCompany():
     data = request.get_data(as_text=True)
     re = DBUtil.addOrUpdateCompany(data)
-    return json.dumps(re)
+    return re
 
 @app.route(apiPrefix + 'deleteCompany/<int:id>', methods=['DELETE'])
 def deleteCompany(id):
     re = DBUtil.deleteCompany(id)
-    return json.dumps(re)
+    print(re)
+    return re
 
 @app.route(apiPrefix + 'getCompanyDetails/<int:id>', methods=['GET'])
 def getCompanyDetails(id):

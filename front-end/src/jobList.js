@@ -13,7 +13,7 @@ import {
 class JobList extends React.Component {
     columns = [{
         title: '序号',
-        dataIndex: 'index',
+        dataIndex: 'id',
         width: 80,
         align: 'center'
     }, {
@@ -76,7 +76,7 @@ class JobList extends React.Component {
         if (this.props.message) {
             message.error(this.props.message.message);
         }
-
+        // console.log(this.props); //redux调用测试
         return (
             <div>
                 <div style={{ textAlign: 'right'}} >

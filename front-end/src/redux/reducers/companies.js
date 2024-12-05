@@ -1,9 +1,7 @@
 const initialState = {
     loading: false,
-    companies: {
-        list: [],  // 公司列表
-        message: '' // 错误或成功信息
-    }
+    list: [],        // 公司列表
+    message: null    // 错误信息
 };
 
 export default function(state = initialState, action) {
@@ -12,7 +10,7 @@ export default function(state = initialState, action) {
             return {
                 ...state,
                 loading: true,
-                companies: { ...state.companies, message: '' } // 清空消息
+                message: '' // 清空消息
             };
         }
         case 'get_companies_success': {
@@ -24,7 +22,8 @@ export default function(state = initialState, action) {
             return {
                 ...state,
                 loading: false,
-                companies: { list: data, message: '' }
+                list: data, 
+                message: '' 
             };
         }
         case 'get_companies_fail': {
@@ -32,21 +31,19 @@ export default function(state = initialState, action) {
             return {
                 ...state,
                 loading: false,
-                companies: { ...state.companies, message: action.payload }
+                message: action.payload
             };
         }
-        case 'update_companies_success': {
+        case 'update_compgetcompanies_success': {
             // 更新公司信息成功，替换指定项并保持索引顺序
-            const updatedList = state.companies.list.map(item =>
+            const updatedList = state.list.map(item =>
                 item.id === action.payload.id ? { ...action.payload } : item
             );
             return {
                 ...state,
                 loading: false,
-                companies: { 
-                    list: updatedList, 
-                    message: '公司信息更新成功' 
-                }
+                list: updatedList, 
+                message: '公司信息更新成功' 
             };
         }
         default:

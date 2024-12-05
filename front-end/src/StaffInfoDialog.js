@@ -12,6 +12,7 @@ class StaffInfoDialog extends React.Component {
     confirmLoading: false,
     staff: {},
     mJobs: [],
+    mcompanies:[],
     deleteConfirm: false,
     fileList: [],
   }
@@ -240,9 +241,12 @@ class StaffInfoDialog extends React.Component {
 
             <Form.Item label="公司" {...styles.formItemLayout}>
               {getFieldDecorator('company')(
-                <Input placeholder="公司" />
+                <Select style={{ width: 140 }} onChange={value => console.log(value)}>
+                  {CommonValues.COMPANIES.map((item) => <Select.Option value={item.id} key={item.id + ''}>{item.name}</Select.Option>)}
+                </Select>
               )}
             </Form.Item>
+
 
             <Form.Item label="学历" {...styles.formItemLayout}>
               {getFieldDecorator('education')(

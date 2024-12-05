@@ -6,7 +6,7 @@ export default class ApiUtil {
     static URL_ROOT = '/api/v1';
 
     static API_JOB_LIST = ApiUtil.URL_ROOT + '/getJobList';
-    static API_JOB_UPDATE = ApiUtil.URL_ROOT + '/UpdateJob';
+    static API_JOB_UPDATE = ApiUtil.URL_ROOT + '/updateJob';
     static API_JOB_DELETE = ApiUtil.URL_ROOT + '/deleteJob/';
 
     static API_STAFF_LIST = ApiUtil.URL_ROOT + '/getStaffList/';

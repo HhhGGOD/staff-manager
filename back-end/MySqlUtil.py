@@ -345,3 +345,115 @@ def deleteJob(id):
   'wechat':'5566',
 }
 searchStaff(where) """
+
+# # 获取公司列表
+# def getCompanyList():
+#     try:
+#         # conn = sqlite3.connect('staff_manager.db')
+#         # cursor = conn.cursor()
+        
+#         # 直接使用静态表名，避免拼接
+#         sql = "select id, name, detail from t_company"
+#         print(sql)  # 打印查询语句用于调试
+#         mycursor.execute(sql)
+#         companies = mycursor.fetchall()
+#         # 检查是否获取到数据
+#         if not companies:
+#             return json.dumps({'code': -1, 'message': 'No data found'})
+
+#         result = []
+#         for company in companies:
+#             result.append({
+#                 'id': company[0],
+#                 'name': company[1],
+#                 'detail': company[2],
+#             })
+#         print(result)
+#         return json.dumps(result)
+#     except Exception as e:
+#         print(f"Error: {str(e)}")
+#         return json.dumps({'code': -1, 'message': f"Error: {str(e)}"})
+
+
+
+# # 添加或更新公司
+# def addOrUpdateCompany(json_str):
+#     try:
+#         # 解析 JSON 字符串
+#         company = json.loads(json_str)
+#         id = company.get('id', 0)
+#         name = company.get('name', '')
+#         detail = company.get('detail', '')
+#         message = ''
+
+#         if id == 0:  # 新增公司
+#             sql = "INSERT INTO t_company (name, detail) VALUES (?, ?)"  # 修正 INSERT 语句
+#             values = (name, detail)
+#             # print(sql, values)
+#             mycursor.execute(sql, values)
+#             mydb.commit()
+#             message = '公司添加成功'
+#             print(mycursor.rowcount, message)
+#         else:  # 更新公司
+#             sql = "UPDATE t_company SET name=?, detail=? WHERE id=?"  # 修正 UPDATE 语句
+#             values = (name, detail, id)
+#             # print(sql, values)
+#             mycursor.execute(sql, values)
+#             mydb.commit()
+#             message = '公司更新成功'
+#             print(mycursor.rowcount,message)
+
+#         mydb.close()  # 关闭连接
+#         re = {
+#             'code': 0,
+#             'message': message
+#         }
+#         return json.dumps(re)
+#     except Exception as e:
+#         re = {
+#             'code': -1,
+#             'message': repr(e)
+#         }
+#         print(repr(e))
+#         return json.dumps(re)
+
+# # 删除公司
+# def deleteCompany(id):
+#     try:
+#         sql = "delete from t_company where id=%d" % (id)
+#         print(sql)
+#         mycursor.execute(sql)
+#         mydb.commit()
+#         re = {
+#             'code': 0,
+#             'message': '删除成功'
+#         }
+#         return json.dumps(re)
+#     except Exception as e:
+#         re = {
+#             'code': -1,
+#             'message': repr(e)
+#         }
+#         return json.dumps(re)
+
+
+# # 获取公司详情
+# def getCompanyDetails(id):
+#     try:
+#         sql = "SELECT id, name, detail FROM t_company WHERE id = %s"
+#         print(sql % id)
+#         mycursor.execute(sql, (id,))
+#         company = mycursor.fetchone()
+
+#         if company:
+#             result = {
+#                 'id': company[0],
+#                 'name': company[1],
+#                 'detail': company[2],
+#             }
+#             return json.dumps(result)
+#         else:
+#             return json.dumps({'code': -1, 'message': '公司未找到'})
+#     except Exception as e:
+#         print(str(e))
+#         return json.dumps({'code': -1, 'message': str(e)})

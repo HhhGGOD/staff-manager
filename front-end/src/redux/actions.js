@@ -1,3 +1,4 @@
+// import companyList from '../companyList';
 import ApiUtil from '../Utils/ApiUtil'
 import HttpUtil from '../Utils/HttpUtil'
 /**
@@ -51,34 +52,23 @@ export const updateJob = (job) => (dispatch, getState) => {
         })
 };
 
-export const getcompanies = () => (dispatch, getState) => {
-    dispatch({
-        type: 'get_compgetcompanies_start',
-    });
-    //先去请求数据
-    HttpUtil.get(ApiUtil.API_COMPANY_LIST)
-        .then(
-            companyList => {
-                //请求数据完成后再dispatch
-                dispatch({
-                    type: 'get_compgetcompanies_success',
-                    payload: companyList
-                })
-            }
-        )
-        .catch(e => {
-            console.log(e)
-            dispatch({
-                type: 'get_compgetcompanies_success',
-                payload: e
-            })
-        })
-};
 
+export const getcompanies = () => async (dispatch) => {
+    try {
+      dispatch({ type: "get_companies_start" });
+      const response = await fetch("/api/v1/getCompanyList");
+      const data = await response.json();
+      dispatch({ type: "get_companies_success", payload: data });
+    } catch (error) {
+      dispatch({ type: "get_companies_fail", payload: error.message });
+    }
+};
+  
+  
 
 
 export const updatecompany = (company) => (dispatch, getState) => {
-    HttpUtil.post(ApiUtil.API_JOB_UPDATE, company)
+    HttpUtil.post(ApiUtil.API_COMPANY_UPDATE, company)
         .then(
             re => {
                 dispatch({

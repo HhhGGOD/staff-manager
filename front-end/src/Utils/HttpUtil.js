@@ -46,5 +46,21 @@ export default class HttpUtil {
         });
     }
 
-
+    static delete(url) {
+        return new Promise((resolve, reject) => {
+            fetch(url, {
+                method: 'DELETE', // 确认使用 DELETE 方法
+            })
+                .then(response => {
+                    if (response.ok) {
+                        return response.json(); // 解析返回的 JSON
+                    } else {
+                        throw new Error(response.status + " : " + response.statusText);
+                    }
+                })
+                .then(result => resolve(result))
+                .catch(error => reject(error));
+        });
+    }
+    
 }

@@ -16,8 +16,10 @@ class StaffList extends React.Component {
 
     state = {
         mJobs: [],
+        mcompanies:[],
         mData: [],
         jobSelected: 0,
+        companySelected:0,
         showInfoDialog: false,
         smallSize: false,
         editingItem: null,
@@ -67,6 +69,16 @@ class StaffList extends React.Component {
     }, {
         title: '公司',
         dataIndex: 'company',
+        key: 'company',
+        render: (companyId) => {
+            console.log('CompanyId:', companyId); // 调试：打印出当前的公司ID
+            const company = CommonValues.COMPANIES.getById(companyId);
+            // console.log('Company:', company); // 调试：打印出返回的公司对象
+            return <span>{company ? company.name : '公司信息未选择'}</span>;
+        },
+        titleStyle: { textAlign: 'center' },  // 设置标题居中
+        // 让列数据居中
+        align: 'center', // 设置列中的数据居中                   
     }, {
         title: '学历',
         dataIndex: 'education',
@@ -130,36 +142,43 @@ class StaffList extends React.Component {
 
     pagination = <Pagination total={this.state.mData.length} hideOnSinglePage={true} />;
 
-    getData() {
-        HttpUtil.get(ApiUtil.API_JOB_LIST)
-            .then(
-                jobList => {
-                    CommonValues.JOBS = [
-                        { 'id': 0, 'name': '' }
-                    ];
-                    CommonValues.JOBS.getById = function (id) {
-                        return CommonValues.JOBS.filter(job => job.id === id)[0]
-                    }
-                    jobList.map(job => CommonValues.JOBS.push(job))
-                }
-            )
-            .then(() => HttpUtil.get(ApiUtil.API_STAFF_LIST + 0))   // TODO:这个版本暂时取全部数据，后面完善
-            .then( // 等待两次请求依次完成了才刷新界面
-                staffList => {
-                    this.mAllData = staffList;
-                    this.setState({
-                        mJobs: CommonValues.JOBS,
-                        mData: staffList,
-                        showInfoDialog: false,
-                        jobSelected: 0,
-                        loading: false,
-                    });
-                }
-            ).catch(error => {
-                message.error(error.message);
-                this.setState({loading:false})
+    async getData() {
+        try {
+            // 获取职位列表
+            const jobList = await HttpUtil.get(ApiUtil.API_JOB_LIST);
+            CommonValues.JOBS = [{ 'id': 0, 'name': '' }];
+            CommonValues.JOBS.getById = function(id) {
+                return CommonValues.JOBS.find(job => job.id === id);
+            };
+            jobList.map(job => CommonValues.JOBS.push(job));
+    
+            // 获取公司列表
+            const companyList = await HttpUtil.get(ApiUtil.API_COMPANY_LIST);
+            CommonValues.COMPANIES = [{ 'id': 0, 'name': '' }];
+            CommonValues.COMPANIES.getById = function(id) {
+                return CommonValues.COMPANIES.find(company => company.id === id);
+            };
+            companyList.map(company => CommonValues.COMPANIES.push(company));
+    
+            // 获取员工列表
+            const staffList = await HttpUtil.get(ApiUtil.API_STAFF_LIST + 0);
+            this.mAllData = staffList;
+    
+            this.setState({
+                mJobs: CommonValues.JOBS,
+                mcompanies: CommonValues.COMPANIES,
+                mData: staffList,
+                showInfoDialog: false,
+                jobSelected: 0,
+                loading: false,
             });
-    }
+        } catch (error) {
+            message.error(error.message);
+            this.setState({ loading: false });
+        }
+    }    
+    
+    
 
     componentDidMount() {
         this.getData();
@@ -215,44 +234,50 @@ class StaffList extends React.Component {
     }
 
 
-    handleFilterChange = (value) => {
-        /* let items = value === 0 ? this.mAllData : this.mAllData.filter(item => item.job === value);
-        this.setState({
-            mData: items,
-            jobSelected: value,
-        }); */
-        this.searchItems['job'] = value;
+    handleFilterChange = (value, type) => {
+        // 根据不同的筛选条件类型进行处理
+        if (type === 'job') {
+            this.searchItems['job'] = value;
+        } else if (type === 'company') {
+            this.searchItems['company'] = value;
+        }
         this.handleSearch();
     }
-
-    searchItems = {};
-
+    
     handleTextChange = (e) => {
         let attr = e.target.getAttribute('item');
         if (attr) {
             this.searchItems[attr] = e.target.value;
-            console.log(attr + ":" + e.target.value);
+            console.log(`${attr}: ${e.target.value}`);
         }
+        this.handleSearch();  // 每次文本输入后都立即进行筛选
     }
+    
     handleSearch = () => {
+        // 将筛选条件转为 URL 查询参数
         let where = JSON.stringify(this.searchItems);
-        let url = ApiUtil.API_STAFF_SEARCH + "?where=" + encodeURI(where);
-        this.setState({loading: true});
+        let url = `${ApiUtil.API_STAFF_SEARCH}?where=${encodeURIComponent(where)}`;
+        
+        this.setState({ loading: true });
+    
+        // 发起请求
         HttpUtil.get(url)
-            .then(
-                staffList => {
-                    this.mAllData = staffList;
-                    this.setState({
-                        mData: staffList,
-                        showInfoDialog: false,
-                        jobSelected: 0,
-                        loading: false,
-                    });
-                }
-            ).catch(error => {
+            .then(staffList => {
+                this.mAllData = staffList;
+                this.setState({
+                    mData: staffList,
+                    showInfoDialog: false,
+                    jobSelected: this.searchItems['job'] || 0,  // 保持选择的职位
+                    companySelected: this.searchItems['company'] || 0, // 保持选择的公司
+                    loading: false,
+                });
+            })
+            .catch(error => {
                 message.error(error.message);
+                this.setState({ loading: false });
             });
     }
+    
 
     render() {
         return (

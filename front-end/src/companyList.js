@@ -8,15 +8,18 @@ import { Table, Icon, Button, message, Input, Modal } from 'antd';
 class CompanyList extends React.Component {
   columns = [{
     title: '序号',
-    dataIndex: 'index',
+    dataIndex: 'id',
     width: 80,
     align: 'center'
   }, {
     title: '公司',
-    dataIndex: 'company',
+    dataIndex: 'name',
+    width: 266,
+    align: 'center'
   }, {
-    title: '详情',
+    title: '资料',
     dataIndex: 'detail',
+    align: 'center'
   }, {
     title: '编辑',
     align: 'center',
@@ -45,19 +48,21 @@ class CompanyList extends React.Component {
   }
 
   removeData(id) {
-    HttpUtil.get(ApiUtil.API_COMPANY_DELETE + id)
-      .then(re => {
-        message.info(re.message);
-        this.props.getcompanies();
-      })
-      .catch(error => {
-        message.error(error.message);
-      });
-  }
+    HttpUtil.delete(ApiUtil.API_COMPANY_DELETE + id)
+        .then(re => {
+            message.info(re.message); // 成功提示
+            this.props.getcompanies(); // 刷新公司列表
+        })
+        .catch(error => {
+            message.error(error.message || '删除失败'); // 错误提示
+        });
+}
+
 
   render() {
     const { companyList, error } = this.props;
     const { company, showAddDialog } = this.state;
+    // console.log(this.props);
 
     // 显示错误信息
     if (error) {
@@ -118,7 +123,7 @@ class CompanyList extends React.Component {
   // 处理表单提交
   handleAdd = () => {
     const { company } = this.state;
-    if (company.name && company.detail) {  // 确保公司名称和详情都不为空
+    if (company.name) {  // 确保公司名称不为空
       HttpUtil.post(ApiUtil.API_COMPANY_UPDATE, company)
         .then(re => {
           message.info(re.message);
@@ -129,7 +134,7 @@ class CompanyList extends React.Component {
           message.error(error.message);
         });
     } else {
-      message.error('请输入公司名和公司详情');
+      message.error('请输入公司名');
     }
   };
 
@@ -167,10 +172,12 @@ handleDetailChanged = (e) => {
   };
 }
 
-const mapStateToProps = (state) => ({
+const mapStateToProps = (state) => {
+  return{
   companyList: state.companies.list, 
-  error: state.companies.message    
-})
+  error: state.companies.message   
+  }
+}
 
 
 export default connect(mapStateToProps, { getcompanies, updatecompany })(CompanyList);
