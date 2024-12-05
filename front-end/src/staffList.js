@@ -16,14 +16,23 @@ class StaffList extends React.Component {
 
     state = {
         mJobs: [],
-        mcompanies:[],
+        mcompanies: [],
         mData: [],
         jobSelected: 0,
-        companySelected:0,
+        companySelected: 0,
         showInfoDialog: false,
         smallSize: false,
         editingItem: null,
         loading: true,
+        searchItems: {
+            job: 0,
+            company: 0,
+            address: '',
+            name: '',
+            phone: '',
+            qq: '',
+            wechat: ''
+        }
     };
 
     showPopoverInfo = (staff) => (
@@ -38,7 +47,7 @@ class StaffList extends React.Component {
     );
 
     showPopoverContact = (staff) => (
-        <div style={{minWidth: 200, }}>
+        <div style={{ minWidth: 200 }}>
             <p>电话：{staff.phone}</p>
             <Divider dashed style={{ marginTop: 4, marginBottom: 8 }} />
             <p>邮箱：{staff.email}</p>
@@ -73,12 +82,10 @@ class StaffList extends React.Component {
         render: (companyId) => {
             console.log('CompanyId:', companyId); // 调试：打印出当前的公司ID
             const company = CommonValues.COMPANIES.getById(companyId);
-            // console.log('Company:', company); // 调试：打印出返回的公司对象
             return <span>{company ? company.name : '公司信息未选择'}</span>;
         },
-        titleStyle: { textAlign: 'center' },  // 设置标题居中
-        // 让列数据居中
-        align: 'center', // 设置列中的数据居中                   
+        titleStyle: { textAlign: 'center' },
+        align: 'center',
     }, {
         title: '学历',
         dataIndex: 'education',
@@ -103,34 +110,9 @@ class StaffList extends React.Component {
                 <Button type="dashed" icon="user" style={{ fontSize: 10 }}>查看</Button>
             </Popover>
         ),
-    }/*, {
-        title: '电话',
-        dataIndex: 'phone',
-        key: 'phone',
     }, {
-        title: 'email',
-        dataIndex: 'email',
-        key: 'email',
-    }, {
-        title: 'QQ',
-        dataIndex: 'qq',
-        key: 'qq',
-    }, {
-        title: '微信',
-        dataIndex: 'wechat',
-        key: 'wechat',
-    }, {
-        title: '工作经历',
-        dataIndex: 'experience',
-        key: 'experience',
-    }, {
-        title: '联系记录',
-        dataIndex: 'contact_logs',
-        key: 'contact_logs',
-    } */, {
         title: '编辑',
         key: 'action',
-        //fixed: 'right',
         width: 80,
         align: 'center',
         render: (staff) => (
@@ -177,8 +159,6 @@ class StaffList extends React.Component {
             this.setState({ loading: false });
         }
     }    
-    
-    
 
     componentDidMount() {
         this.getData();
@@ -202,9 +182,6 @@ class StaffList extends React.Component {
         if (item === undefined) {
             item = {};
         }
-
-        // state元素为对象时赋值，同时注意不要给state直接赋值，先追加到空对象{}
-        //let currentStaff = Object.assign({}, this.state.staff, item);
         this.setState({
             showInfoDialog: true,
             editingItem: item,
@@ -233,33 +210,48 @@ class StaffList extends React.Component {
         }
     }
 
-
     handleFilterChange = (value, type) => {
         // 根据不同的筛选条件类型进行处理
+        let searchItems = { ...this.state.searchItems };
         if (type === 'job') {
-            this.searchItems['job'] = value;
+            searchItems['job'] = value;
         } else if (type === 'company') {
-            this.searchItems['company'] = value;
+            searchItems['company'] = value;
         }
-        this.handleSearch();
+        this.setState({ searchItems }, this.handleSearch);
     }
-    
+
     handleTextChange = (e) => {
         let attr = e.target.getAttribute('item');
         if (attr) {
-            this.searchItems[attr] = e.target.value;
-            console.log(`${attr}: ${e.target.value}`);
+            let searchItems = { ...this.state.searchItems };
+            searchItems[attr] = e.target.value;
+            this.setState({ searchItems }, this.handleSearch);
         }
-        this.handleSearch();  // 每次文本输入后都立即进行筛选
     }
-    
+
     handleSearch = () => {
-        // 将筛选条件转为 URL 查询参数
-        let where = JSON.stringify(this.searchItems);
+        // 打印 searchItems 的内容来调试
+        console.log("Current search items:", this.state.searchItems);
+
+        const { searchItems } = this.state;
+
+        // 确保 `searchItems` 不为空或没有全是默认值
+        const searchParams = { ...searchItems };
+
+        // 检查 searchParams 是否包含有效的筛选条件
+        if (Object.keys(searchParams).length === 0 || Object.values(searchParams).every(val => val === '' || val === 0)) {
+            console.log("No valid search conditions, skipping search.");
+            return;  // 如果没有有效的筛选条件，则跳过请求
+        }
+
+        let where = JSON.stringify(searchParams);
         let url = `${ApiUtil.API_STAFF_SEARCH}?where=${encodeURIComponent(where)}`;
-        
+
+        console.log("Search URL:", url);  // 调试：输出请求 URL
+
         this.setState({ loading: true });
-    
+
         // 发起请求
         HttpUtil.get(url)
             .then(staffList => {
@@ -267,8 +259,8 @@ class StaffList extends React.Component {
                 this.setState({
                     mData: staffList,
                     showInfoDialog: false,
-                    jobSelected: this.searchItems['job'] || 0,  // 保持选择的职位
-                    companySelected: this.searchItems['company'] || 0, // 保持选择的公司
+                    jobSelected: searchParams['job'] || 0,  // 保持选择的职位
+                    companySelected: searchParams['company'] || 0, // 保持选择的公司
                     loading: false,
                 });
             })
@@ -277,18 +269,20 @@ class StaffList extends React.Component {
                 this.setState({ loading: false });
             });
     }
-    
 
     render() {
         return (
             <div>
 
                 <div>
-                    <Select style={{ width: 160, marginRight: 20, marginTop: 4 }} defaultValue={this.state.jobSelected} onChange={this.handleFilterChange}>
+                    <Select style={{ width: 160, marginRight: 20, marginTop: 4 }} value={this.state.jobSelected} onChange={(value) => this.handleFilterChange(value, 'job')}>
                         {this.state.mJobs.map((item) => <Select.Option value={item.id} key={item.id + ''}>{item.id > 0 ? item.name : '所有职位'}</Select.Option>)}
                     </Select>
+                    <Select style={{ width: 160, marginRight: 20, marginTop: 4 }} value={this.state.companySelected} onChange={(value) => this.handleFilterChange(value, 'company')}>
+                        {this.state.mcompanies.map((item) => <Select.Option value={item.id} key={item.id + ''}>{item.id > 0 ? item.name : '所有公司'}</Select.Option>)}
+                    </Select>
                     <Input placeholder="地址" item="address" prefix={<Icon type="home" style={styles.prefixIcon} />} style={styles.searchItem} onChange={this.handleTextChange} />
-                    <Input placeholder="姓名" item="name" prefix={<Icon type="user" style={styles.prefixIcon} />} style={styles.searchItem} onChange={this.handleTextChange} />
+                    <Input placeholder="姓名" item="name" prefix={<Icon type="user" style={styles.prefixIcon} />} style={styles.searchItem} />
                     <Input placeholder="电话" item="phone" prefix={<Icon type="mobile" style={styles.prefixIcon} />} style={styles.searchItem} onChange={this.handleTextChange} />
                     {this.state.smallSize && <br />}
                     <Input placeholder="QQ" item="qq" prefix={<Icon type="qq" style={styles.prefixIcon} />} style={styles.searchItem} onChange={this.handleTextChange} />
@@ -313,7 +307,7 @@ class StaffList extends React.Component {
                     afterClose={() => this.setState({ showInfoDialog: false })}
                     onDialogConfirm={this.handleInfoDialogClose} />
             </div>
-        )
+        );
     }
 }
 
@@ -330,7 +324,7 @@ const styles = {
         marginTop: 4, 
         marginBottom: 8,
     }
-}
-
+};
 
 export default StaffList;
+

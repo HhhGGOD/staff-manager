@@ -232,13 +232,23 @@ staffColumns = ('id', 'name', 'job', 'company', 'education', 'gender', 'birth_ye
 
 def getStaffsFromData(dataList):
     staffs = []
-    for itemArray in dataList:   # dataList数据库返回的数据集，是一个二维数组
+    for itemArray in dataList:   # dataList 是数据库返回的数据集，是一个二维数组
         staff = {}
+
         for columnIndex, columnName in enumerate(staffColumns):
             columnValue = itemArray[columnIndex]
+
+            # 对每一列的空值进行适当的处理
             if columnValue is None:
-                columnValue = 0 if columnName in (
-                    'job', 'education', 'birth_year') else ''
+                if columnName in ('job', 'education', 'birth_year'):  # 针对数字字段使用 0 作为默认值
+                    columnValue = 0
+                else:
+                    columnValue = ''  # 其他字段使用空字符串作为默认值
+
+            # 根据列名处理公司（company）字段，或者可以根据具体需求进行其他处理
+            if columnName == 'company' and columnValue == 0:
+                columnValue = '未选择'  # 如果公司字段为 0，表示未选择
+
             staff[columnName] = columnValue
 
         staffs.append(staff)
@@ -270,37 +280,47 @@ def searchStaff(where):
         sql_where = ''
         sql_like = ''
         
-        if where.get('job', 0) > 0:
-            sql_where = ("where job=" + str(where['job']))
+        # 处理 company 筛选条件
+        if where.get('company', 0) > 0:
+            sql_where = "where company = %d" % where['company']
 
+        # 处理 job 筛选条件
+        if where.get('job', 0) > 0:
+            if sql_where:
+                sql_where += " and job = %d" % where['job']
+            else:
+                sql_where = "where job = %d" % where['job']
+        
+        # 处理模糊搜索条件
         where_like_items = []
         for key, value in where.items():
             if isinstance(value, str) and len(value.strip()) > 0:
                 where_item = (key + " like '%" + value + "%'")
                 where_like_items.append(where_item)
-  
+        
         if len(where_like_items) > 0:
             sql_like = "(%s)" % ' or '.join(where_like_items)
-
-        if len(sql_where) > 0:
-            if len(sql_like) > 0:
-                sql_where += (" and " + sql_like)
-        else:
-            if len(sql_like) > 0:
+        
+        if sql_like:
+            if sql_where:
+                sql_where += " and " + sql_like
+            else:
                 sql_where = "where " + sql_like
 
+        # 构造最终的 SQL 查询
         columns = ','.join(staffColumns)
         order = ' order by id desc'
         sql = "select %s from t_staff %s%s" % (columns, sql_where, order)
-        print(sql)
+
+        print(sql)  # 打印 SQL 查询，检查是否正确
 
         cursor.execute(sql)
-
-        dateList = cursor.fetchall()     # fetchall() 获取所有记录
+        dateList = cursor.fetchall()  # 获取查询结果
         return dateList
     except Exception as e:
         print(repr(e))
         return []
+
 
 
 def saveStaffToCVX(jobId):
