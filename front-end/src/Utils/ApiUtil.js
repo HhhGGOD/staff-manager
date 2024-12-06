@@ -14,12 +14,6 @@ export default class ApiUtil {
     static API_STAFF_DELETE = ApiUtil.URL_ROOT + '/deleteStaff/';
     static API_STAFF_SEARCH = ApiUtil.URL_ROOT + '/searchStaff';
 
-    static API_FILE_UPLOAD = ApiUtil.URL_ROOT + '/fileUpload';
-    static API_FILE_DELETE = ApiUtil.URL_ROOT + '/fileDelete';
-    static API_FILE_DELETE_DIR = ApiUtil.URL_ROOT + '/fileDeleteDir/';
-    static API_FILE_GET = ApiUtil.URL_ROOT + '/fileGetDir';
-    static API_FILE_GET = ApiUtil.URL_ROOT + '/fileGet';
-    static API_FILE_GET_LIST = ApiUtil.URL_ROOT + '/fileGetList/';
     static API_FILE_BACKUP = ApiUtil.URL_ROOT + '/fileBackup';
     static API_FILE_GET_BACKUP = ApiUtil.URL_ROOT + '/fileGetBackup';
 
@@ -27,5 +21,15 @@ export default class ApiUtil {
     static API_COMPANY_UPDATE = ApiUtil.URL_ROOT + '/updateCompany'; 
     static API_COMPANY_DELETE = ApiUtil.URL_ROOT + '/deleteCompany/'; 
     static API_COMPANY_DETAIL = ApiUtil.URL_ROOT + '/getCompanyDetails/'; 
+    
+    static API_FILE_GET_LIST = ApiUtil.URL_ROOT + '/fileGetList/';
+    static API_FILE_GET = ApiUtil.URL_ROOT + '/fileGetDir';
+    static API_FILE_GET = ApiUtil.URL_ROOT + '/fileGet';
+    static API_FILE_DELETE_DIR = ApiUtil.URL_ROOT + '/fileDeleteDir/';
+    static API_FILE_DELETE = ApiUtil.URL_ROOT + '/fileDelete';
+    static API_FILE_UPLOAD = ApiUtil.URL_ROOT + '/fileUpload';
 
+    static API_DATA_FILE_UPLOAD = ApiUtil.URL_ROOT + '/importFiles';
+    static API_DATA_FILE_DELETE = ApiUtil.URL_ROOT + '/deleteFiles/';
+    static API_DATA_FILE_PROCESS = ApiUtil.URL_ROOT + '/processFiles';
 }
