@@ -6,31 +6,36 @@ import { getcompanies, updatecompany } from "./redux/actions";
 import { Table, Icon, Button, message, Input, Modal } from 'antd';
 
 class CompanyList extends React.Component {
-  columns = [{
-    title: '序号',
-    dataIndex: 'id',
-    width: 80,
-    align: 'center'
-  }, {
-    title: '公司',
-    dataIndex: 'name',
-    width: 266,
-    align: 'center'
-  }, {
-    title: '资料',
-    dataIndex: 'detail',
-    align: 'center'
-  }, {
-    title: '编辑',
-    align: 'center',
-    width: 160,
-    render: (company) => (
-      <span>
-        <Icon type="edit" title="编辑" onClick={() => this.showUpdateDialog(company)} />
-        <Icon type="close" title="删除" style={{ color: '#ee6633', marginLeft: 12 }} onClick={() => this.deleteConfirm(company)} />
-      </span>
-    ),
-  }];
+  columns = [
+    {
+      title: '序号',
+      render: (text, record, index) => index + 1,  // 使用数组索引生成序号
+      width: 80,
+      align: 'center',
+    },
+    {
+      title: '公司',
+      dataIndex: 'name',
+      width: 266,
+      align: 'center',
+    },
+    {
+      title: '资料',
+      dataIndex: 'detail',
+      align: 'center',
+    },
+    {
+      title: '编辑',
+      align: 'center',
+      width: 160,
+      render: (company) => (
+        <span>
+          <Icon type="edit" title="编辑" onClick={() => this.showUpdateDialog(company)} />
+          <Icon type="close" title="删除" style={{ color: '#ee6633', marginLeft: 12 }} onClick={() => this.deleteConfirm(company)} />
+        </span>
+      ),
+    },
+  ];
 
   state = {
     mcompanies: [],
@@ -56,13 +61,11 @@ class CompanyList extends React.Component {
         .catch(error => {
             message.error(error.message || '删除失败'); // 错误提示
         });
-}
-
+  }
 
   render() {
     const { companyList, error } = this.props;
     const { company, showAddDialog } = this.state;
-    // console.log(this.props);
 
     // 显示错误信息
     if (error) {
@@ -123,7 +126,7 @@ class CompanyList extends React.Component {
   // 处理表单提交
   handleAdd = () => {
     const { company } = this.state;
-    if (company.name) {  // 确保公司名称不为空
+    if (company.name && company.detail) {  // 确保公司名称和公司详情都不为空
       HttpUtil.post(ApiUtil.API_COMPANY_UPDATE, company)
         .then(re => {
           message.info(re.message);
@@ -134,27 +137,25 @@ class CompanyList extends React.Component {
           message.error(error.message);
         });
     } else {
-      message.error('请输入公司名');
+      message.error('请输入公司名和公司详情');
     }
   };
 
-  
-// 更新公司名称
-handleTextChanged = (e) => {
-  const name = e.target.value;
-  this.setState(prevState => ({
-      company: { ...prevState.company, name }
-  }));
-};
+  // 更新公司名称
+  handleTextChanged = (e) => {
+    const name = e.target.value;
+    this.setState(prevState => ({
+        company: { ...prevState.company, name }
+    }));
+  };
 
-// 更新公司详情
-handleDetailChanged = (e) => {
-  const detail = e.target.value;
-  this.setState(prevState => ({
-      company: { ...prevState.company, detail }
-  }));
-};
-
+  // 更新公司详情
+  handleDetailChanged = (e) => {
+    const detail = e.target.value;
+    this.setState(prevState => ({
+        company: { ...prevState.company, detail }
+    }));
+  };
 
   // 删除公司确认
   deleteConfirm = (company) => {
@@ -173,11 +174,10 @@ handleDetailChanged = (e) => {
 }
 
 const mapStateToProps = (state) => {
-  return{
-  companyList: state.companies.list, 
-  error: state.companies.message   
-  }
-}
-
+  return {
+    companyList: state.companies.list, 
+    error: state.companies.message   
+  };
+};
 
 export default connect(mapStateToProps, { getcompanies, updatecompany })(CompanyList);

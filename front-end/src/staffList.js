@@ -281,7 +281,7 @@ class StaffList extends React.Component {
                         {this.state.mcompanies.map((item) => <Select.Option value={item.id} key={item.id + ''}>{item.id > 0 ? item.name : '所有公司'}</Select.Option>)}
                     </Select>
                     <Input placeholder="地址" item="address" prefix={<Icon type="home" style={styles.prefixIcon} />} style={styles.searchItem} onChange={this.handleTextChange} />
-                    <Input placeholder="姓名" item="name" prefix={<Icon type="user" style={styles.prefixIcon} />} style={styles.searchItem} />
+                    <Input placeholder="姓名" item="name" prefix={<Icon type="user" style={styles.prefixIcon} />} style={styles.searchItem} onChange={this.handleTextChange}/>
                     <Input placeholder="电话" item="phone" prefix={<Icon type="mobile" style={styles.prefixIcon} />} style={styles.searchItem} onChange={this.handleTextChange} />
                     {this.state.smallSize && <br />}
                     <Input placeholder="QQ" item="qq" prefix={<Icon type="qq" style={styles.prefixIcon} />} style={styles.searchItem} onChange={this.handleTextChange} />
