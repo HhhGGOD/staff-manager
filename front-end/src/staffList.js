@@ -79,10 +79,9 @@ class StaffList extends React.Component {
         title: '公司',
         dataIndex: 'company',
         key: 'company',
-        render: (companyId) => {
-            console.log('CompanyId:', companyId); // 调试：打印出当前的公司ID
-            const company = CommonValues.COMPANIES.getById(companyId);
-            return <span>{company ? company.name : '公司信息未选择'}</span>;
+        render: (companyName) => { // 将companyId改为companyName
+            // console.log('CompanyName:', companyName); // 调试：打印出当前的公司名称
+            return <span>{companyName ? companyName : '公司信息未选择'}</span>;
         },
         titleStyle: { textAlign: 'center' },
         align: 'center',

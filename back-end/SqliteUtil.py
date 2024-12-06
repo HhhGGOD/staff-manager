@@ -238,6 +238,10 @@ def getStaffsFromData(dataList):
         for columnIndex, columnName in enumerate(staffColumns):
             columnValue = itemArray[columnIndex]
 
+            # # 打印每个员工的公司值，用于调试
+            # if columnName == 'company':
+            #     print(f"Employee company ID: {columnValue}")
+
             # 对每一列的空值进行适当的处理
             if columnValue is None:
                 if columnName in ('job', 'education', 'birth_year'):  # 针对数字字段使用 0 作为默认值
@@ -245,15 +249,36 @@ def getStaffsFromData(dataList):
                 else:
                     columnValue = ''  # 其他字段使用空字符串作为默认值
 
-            # 根据列名处理公司（company）字段，或者可以根据具体需求进行其他处理
-            if columnName == 'company' and columnValue == 0:
-                columnValue = '未选择'  # 如果公司字段为 0，表示未选择
+            # 根据列名处理公司（company）字段，查询公司名称
+            if columnName == 'company' and columnValue:
+                # 获取公司名称，假设 `columnValue` 是公司 ID
+                company_name = getCompanyNameById(columnValue)
+                columnValue = company_name if company_name else '未选择'
 
             staff[columnName] = columnValue
 
         staffs.append(staff)
 
     return staffs
+
+
+
+def getCompanyNameById(company_id):
+    try:
+        # print(f"Fetching company name for ID: {company_id}")  # 增加调试日志
+        sql = "SELECT name FROM t_company WHERE id = ?"
+        cursor.execute(sql, (company_id,))
+        company = cursor.fetchone()
+        if company:
+            # print(f"Found company: {company[0]}")  # 打印找到的公司名
+            return company[0]  # 返回公司名称
+        else:
+            print(f"No company found for ID: {company_id}")  # 未找到公司时的日志
+            return None  # 如果没有找到对应的公司，返回 None
+    except Exception as e:
+        print(f"Error fetching company name: {str(e)}")
+        return None
+
 
 
 def getStaffList(job):
