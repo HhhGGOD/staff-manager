@@ -1,6 +1,8 @@
 import pandas as pd
 import os
 
+
+
 # 需要的列名
 required_columns = ['姓名', '基本工资', '岗位工资', '工龄工资', '考核工资', '预发效益', '加班工资', '补发', '应发工资']
 
@@ -33,6 +35,7 @@ def process_data(file_paths):
             df = pd.read_excel(xls, sheet_name=sheet_name, header=1)
 
             # 选择需要的列
+            required_columns = ['姓名', '工号', '部门', '工资']  # 假设需要这些列
             available_columns = [col for col in df.columns if col in required_columns]
             df = df[available_columns]
 
@@ -52,9 +55,7 @@ def process_data(file_paths):
     if all_data:
         merged_data = pd.concat(all_data, ignore_index=True)
         return merged_data
-    else:
-        return None
-
+    
 
 def save_to_excel(data, output_file_path):
     if data is not None:

@@ -29,7 +29,7 @@ export default class ApiUtil {
     static API_FILE_DELETE = ApiUtil.URL_ROOT + '/fileDelete';
     static API_FILE_UPLOAD = ApiUtil.URL_ROOT + '/fileUpload';
 
-    static API_DATA_FILE_UPLOAD = ApiUtil.URL_ROOT + '/importFiles';
+    static API_DATA_FILE_UPLOAD = ApiUtil.URL_ROOT + '/uploadFiles';
     static API_DATA_FILE_DELETE = ApiUtil.URL_ROOT + '/deleteFiles/';
     static API_DATA_FILE_PROCESS = ApiUtil.URL_ROOT + '/processFiles';
 }

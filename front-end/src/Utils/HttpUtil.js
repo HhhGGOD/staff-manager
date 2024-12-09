@@ -63,4 +63,27 @@ export default class HttpUtil {
         });
     }
     
+
+    static postData(url, data) {
+        return new Promise((resolve, reject) => {
+            // 判断是否是 FormData 对象（用于文件上传）
+            const headers = data instanceof FormData ? {} : {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+            };
+    
+            fetch(url, {
+                method: 'POST',
+                headers: headers,  // 如果是 FormData，不需要设置 Content-Type，浏览器会自动处理
+                body: data,  // 如果是 FormData，直接将其传递给 body
+            })
+                .then(response => response.json())
+                .then(result => resolve(result))
+                .catch(error => {
+                    reject(error);
+                })
+        });
+    }
+    
 }
+

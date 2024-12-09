@@ -16,6 +16,8 @@ export default class DataManager extends React.Component {
   // 读取文件夹中的所有文件
   handleFolderChange = (event) => {
     const files = event.target.files;
+    console.log('Selected files:', files);  // 打印文件列表
+    
     if (files.length === 0) {
       message.warning('没有选择任何文件');
       return;
@@ -36,21 +38,22 @@ export default class DataManager extends React.Component {
       message.warning('请先选择文件夹');
       return;
     }
+
+    console.log('Files to be uploaded:', fileList);
+
     // 选择多个文件上传
     const formData = new FormData();
     fileList.forEach(file => {
-      formData.append('files[]', file);  // 使用 'files[]' 键来上传多个文件
+        formData.append('files[]', file);  // 使用 'files[]' 作为文件字段名
     });
 
-    HttpUtil.post(ApiUtil.API_DATA_FILE_UPLOAD, formData, {
-      headers: { 'Content-Type': 'multipart/form-data' }, // 注意这里是 multipart/form-data
-    })
-      .then(response => {
-        // 处理成功响应
-      })
-      .catch(error => {
-        // 处理错误
-      });
+    HttpUtil.postData(ApiUtil.API_DATA_FILE_UPLOAD, formData)
+        .then(response => {
+            // 处理成功响应
+        })
+        .catch(error => {
+            // 处理错误
+        });
 
   };
 
@@ -71,7 +74,7 @@ export default class DataManager extends React.Component {
 
     this.setState({ processing: true });
 
-    HttpUtil.post(ApiUtil.API_DATA_FILE_PROCESS, {
+    HttpUtil.postData(ApiUtil.API_DATA_FILE_PROCESS, {
       file_paths: this.state.fileList.map((file) => file.name),
     })
       .then((response) => {
