@@ -240,9 +240,15 @@ class StaffInfoDialog extends React.Component {
             </Form.Item>
 
             <Form.Item label="公司" {...styles.formItemLayout}>
-              {getFieldDecorator('company')(
-                <Select style={{ width: 140 }} onChange={value => console.log(value)}>
-                  {CommonValues.COMPANIES.map((item) => <Select.Option value={item.id} key={item.id + ''}>{item.name}</Select.Option>)}
+              {getFieldDecorator('company', {
+                initialValue: staff.companyId, // 默认选择当前员工的公司ID
+              })(
+                <Select style={{ width: 140 }} >
+                  {CommonValues.COMPANIES.map((item) => (
+                    <Select.Option value={item.id} key={item.id}>
+                      {item.name}
+                    </Select.Option>
+                  ))}
                 </Select>
               )}
             </Form.Item>
@@ -331,9 +337,6 @@ class StaffInfoDialog extends React.Component {
 
 
           </Form>
-
-
-
         </div>
       </Modal>
     );
@@ -354,14 +357,14 @@ const styles = {
 
 };
 
-const objToForm = (obj) => {
-  let target = {}
-  // Object.entries 返回其可枚举属性的键值对的对象。
-  for (let [key, value] of Object.entries(obj)) {
-    target[key] = Form.createFormField({ value })
-  }
-  return target
-}
+// const objToForm = (obj) => {
+//   let target = {}
+//   // Object.entries 返回其可枚举属性的键值对的对象。
+//   for (let [key, value] of Object.entries(obj)) {
+//     target[key] = Form.createFormField({ value })
+//   }
+//   return target
+// }
 
 
 const mForm = Form.create({
@@ -370,8 +373,17 @@ const mForm = Form.create({
     if (!props.staff) {
       return;
     }
-    return objToForm(props.staff);
-  }
+    const staff = props.staff;
+    return {
+      id: Form.createFormField({ value: staff.id }),
+      name: Form.createFormField({ value: staff.name }),
+      job: Form.createFormField({ value: staff.job }),
+      company: Form.createFormField({ value: staff.companyId }), // 使用公司ID
+      education: Form.createFormField({ value: staff.education }),
+      // 其他字段...
+    };
+  },
 })(StaffInfoDialog);
+
 
 export default mForm;
