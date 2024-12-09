@@ -50,11 +50,11 @@ export default class DataManager extends React.Component {
     HttpUtil.postData(ApiUtil.API_DATA_FILE_UPLOAD, formData)
         .then(response => {
             // 处理成功响应
+            message.info(`文件上传成功`);
         })
         .catch(error => {
             // 处理错误
         });
-
   };
 
   // 删除文件

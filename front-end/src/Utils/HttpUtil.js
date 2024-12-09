@@ -74,14 +74,20 @@ export default class HttpUtil {
     
             fetch(url, {
                 method: 'POST',
-                headers: headers,  // 如果是 FormData，不需要设置 Content-Type，浏览器会自动处理
-                body: data,  // 如果是 FormData，直接将其传递给 body
+                headers: headers, // 动态设置请求头
+                body: data instanceof FormData ? data : JSON.stringify(data), // 判断是否需要序列化
             })
-                .then(response => response.json())
-                .then(result => resolve(result))
-                .catch(error => {
-                    reject(error);
-                })
+            .then(response => {
+                if (!response.ok) {
+                    // 如果服务器返回非 2xx 状态码
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json(); // 解析 JSON 响应
+            })
+            .then(result => resolve(result))
+            .catch(error => {
+                reject(error);
+            });
         });
     }
     

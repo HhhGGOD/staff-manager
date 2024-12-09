@@ -3,7 +3,7 @@
 # 使用flask提供restful接口
 # 先安装依赖：pip install flask
 
-from flask import Flask, render_template, request, send_from_directory
+from flask import Flask, render_template, request, send_from_directory, jsonify
 import os
 import SqliteUtil as DBUtil
 import json
@@ -14,8 +14,10 @@ from DataManager import import_files_from_folder, delete_file, process_data, sav
 from werkzeug.utils import secure_filename
 
 upload_root_dir = 'uploads'
+import os
 
-
+# 定义保存输出文件的目录
+OUTPUT_DIR = 'output'
 
 # Flask初始化参数尽量使用你的包名，这个初始化方式是官方推荐的，官方解释：http://flask.pocoo.org/docs/0.12/api/#flask.Flask
 '''
@@ -186,11 +188,11 @@ def allowed_file(filename):
 @app.route(apiPrefix +'uploadFiles', methods=['POST'])
 def upload_files():
     if 'files[]' not in request.files:
-        return json.dumps({'code': -1, 'message': '未上传文件'}), 400
+        return jsonify({'code': -1, 'message': '未上传文件'}), 400
     
     files = request.files.getlist('files[]')
     if not files:
-        return json.dumps({'code': -1, 'message': '没有选择文件'}), 400
+        return jsonify({'code': -1, 'message': '没有选择文件'}), 400
     
     # Debug输出每个文件的内容
     for file in files:
@@ -201,17 +203,17 @@ def upload_files():
         # 将文件保存到服务器
         file.seek(0)  # 重置文件指针到文件开头
         filename = secure_filename(file.filename)
-        save_path = os.path.join('uploads', filename)
+        save_path = os.path.join('uploadsData', filename)
         
         # 确保上传文件夹存在
-        if not os.path.exists('uploads'):
-            os.makedirs('uploads')
+        if not os.path.exists('uploadsData'):
+            os.makedirs('uploadsData')
         
         # 保存文件
         with open(save_path, 'wb') as f:
             f.write(file.read())  # 写入文件内容
         
-    return json.dumps({'code': 0, 'message': '上传成功'}), 200
+    return jsonify({'code': 0, 'message': '上传成功'}), 200
 
 
 
@@ -223,34 +225,38 @@ def api_delete_files():
     selected_files = data.get('selected_files', [])
 
     if not file_paths or not selected_files:
-        return json.dumps({'code': -1, 'message': '文件路径或选中文件不能为空'}), 400
+        return jsonify({'code': -1, 'message': '文件路径或选中文件不能为空'}), 400
 
     updated_paths = delete_file(file_paths, selected_files)
-    return json.dumps({'code': 0, 'message': '文件删除成功', 'data': updated_paths}), 200
+    return jsonify({'code': 0, 'message': '文件删除成功', 'data': updated_paths}), 200
 
 
 # 处理文件接口
 
-@app.route(apiPrefix +'/processFiles', methods=['POST'])
+@app.route(apiPrefix + '/processFiles', methods=['POST'])
 def process_files():
-    data = request.json
-    file_paths = data.get('file_paths', [])
+    file_paths = [os.path.join('uploadsData', filename) 
+                  for filename in os.listdir('uploadsData') 
+                  if filename.endswith(('.xlsx', '.xls'))]
+    # print("uploadsData 文件夹内容:", os.listdir('uploadsData'))
+    # print("上传文件夹路径:", os.path.abspath('uploadsData'))
 
     if not file_paths:
-        return json.dumps({'code': -1, 'message': '未上传文件'}), 400
+        return jsonify({'code': -1, 'message': '没有找到可处理的文件'}), 400
 
     # 处理文件
     merged_data = process_data(file_paths)
     if merged_data is None:
-        return json.dumps({'code': -1, 'message': '没有有效数据'}), 400
+        return jsonify({'code': -1, 'message': '没有有效数据'}), 400
 
-    # 保存结果
+    # 保存合并后的数据
     output_file_path = 'output/processed_data.xlsx'
     success = save_to_excel(merged_data, output_file_path)
+
     if success:
-        return json.dumps({'code': 0, 'message': '数据处理成功', 'output_file_path': output_file_path}), 200
+        return jsonify({'code': 0, 'message': '数据处理成功'}), 200
     else:
-        return json.dumps({'code': -1, 'message': '保存文件失败'}), 500
+        return jsonify({'code': -1, 'message': '保存文件失败'}), 500
 
 
 
