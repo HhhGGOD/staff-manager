@@ -9,10 +9,11 @@ import SqliteUtil as DBUtil
 import json
 import FileUtil
 import pandas as pd
-import shutil
 from io import BytesIO
 from DataManager import import_files_from_folder, delete_file, process_data, save_to_excel
 from werkzeug.utils import secure_filename
+from flask_cors import CORS
+
 
 upload_root_dir = 'uploads'
 import os
@@ -23,7 +24,7 @@ OUTPUT_DIR = 'output'
 
 #app = Flask(__name__, static_folder="templates",static_url_path="/staff-manager")
 app = Flask(__name__, template_folder='front-end', static_folder="output", static_url_path="/staff-manager")
-
+CORS(app, origins="http://localhost:3000")
 
 # hello
 @app.route('/hello')
@@ -240,7 +241,7 @@ def process_files():
 
     merged_data = process_data(file_paths, selected_indices)
     print(f"接收到的选中列索引: {selected_indices}")
-    
+
     if not file_paths:
         return jsonify({'code': -1, 'message': '没有找到可处理的文件'}), 400
 
@@ -303,4 +304,5 @@ def clear_cache():
 if __name__ == "__main__":
     # 如果不限于本机使用：app.run(host='0.0.0.0')
     # 调试模式，修改文件之后自动更新重启。
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000)
+

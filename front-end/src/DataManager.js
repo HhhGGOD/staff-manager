@@ -11,6 +11,7 @@ export default class DataManager extends React.Component {
     processing: false, // 数据处理状态
     showDownload: false, // 是否显示下载按钮
     downloadUrl: '', // 下载链接
+    fileUploaded: false,
     selectedColumns: ['姓名'], // 姓名列默认选中并固定
     columnButtons: ['姓名', '基本工资', '岗位工资', '工龄工资', '考核工资', '预发效益', '加班工资', '补发', '应发工资',  '医疗保险', '失业保险', '住房公积金', '工会费',  '其他扣除',  '个人所得税',  '实发工资'],
   };
@@ -24,7 +25,7 @@ export default class DataManager extends React.Component {
       message.warning('没有选择任何文件');
       return;
     }
-
+    
     const fileList = [];
     for (let i = 0; i < files.length; i++) {
       fileList.push(files[i]);
@@ -53,6 +54,7 @@ export default class DataManager extends React.Component {
         .then(response => {
             // 处理成功响应
             message.info(`文件上传成功`);
+            this.setState({ fileUploaded: true });
         })
         .catch(error => {
             // 处理错误
@@ -104,7 +106,7 @@ handleClearCache = () => {
       return;
     }
     
-    if (selectedColumns.length === 0) {
+    if (selectedColumns.length === 1) {
       message.warning('请选择至少一个列');
       return;
     }
@@ -134,6 +136,8 @@ handleClearCache = () => {
           link.click();  
           document.body.removeChild(link);  
           
+          this.handleClearCache();
+
           message.success('数据处理成功');
         } else {
           message.error('数据处理失败');
@@ -145,13 +149,14 @@ handleClearCache = () => {
       .finally(() => {
         this.setState({ processing: false });
       });
+      
   };
   
   
   
 
   render() {
-    const { fileList, processing, columnButtons, selectedColumns} = this.state;
+    const { fileList, processing, columnButtons, selectedColumns, fileUploaded} = this.state;
 
     return (
       <div style={{ marginTop: 24 }}>
@@ -213,10 +218,10 @@ handleClearCache = () => {
         <Button
           type="primary"
           onClick={this.handleProcess}
-          disabled={fileList.length === 0 || processing}
+          disabled={!fileUploaded || processing}
           htmlType="button"  // 确保按钮的类型是 "button" 而不是 "submit"
         >
-          {processing ? <Spin size="small" /> : '处理数据'}
+          {processing ? <Spin size="small" /> : '筛选数据'}
         </Button>
 
 
