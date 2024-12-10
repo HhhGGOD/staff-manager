@@ -1,7 +1,7 @@
 import React from 'react';
 import HttpUtil from './Utils/HttpUtil'; // 需要自定义后端请求工具
 import ApiUtil from './Utils/ApiUtil'; // 配置API路径
-import { Collapse, Button, message, List, Spin, Upload } from 'antd';
+import { Collapse, Button, message, List, Checkbox, Spin, Upload } from 'antd';
 // import { UploadOutlined } from '@ant-design/icons'; // 上传图标
 import exampleImage from './images/文件示例.png'; // 引入图片
 
@@ -11,6 +11,8 @@ export default class DataManager extends React.Component {
     processing: false, // 数据处理状态
     showDownload: false, // 是否显示下载按钮
     downloadUrl: '', // 下载链接
+    selectedColumns: ['姓名'], // 姓名列默认选中并固定
+    columnButtons: ['姓名', '基本工资', '岗位工资', '工龄工资', '考核工资', '预发效益', '加班工资', '补发', '应发工资',  '医疗保险', '失业保险', '住房公积金', '工会费',  '其他扣除',  '个人所得税',  '实发工资'],
   };
 
   // 读取文件夹中的所有文件
@@ -84,20 +86,40 @@ handleClearCache = () => {
     });
 };
   
+  handleColumnChange = (selectedColumns) => {
+    if (!selectedColumns.includes('姓名')) {
+      selectedColumns.push('姓名');
+    }
+    this.setState({ selectedColumns });
+  };
 
   // 处理数据（处理整个文件夹中的文件）
   handleProcess = (event) => {
     event.preventDefault();  // 确保阻止默认的表单提交行为
-    
-    if (this.state.fileList.length === 0) {
+
+    const { selectedColumns, fileList, columnButtons } = this.state;
+
+    if (fileList.length === 0) {
       message.warning('请先上传文件');
       return;
     }
-  
+    
+    if (selectedColumns.length === 0) {
+      message.warning('请选择至少一个列');
+      return;
+    }
+
     this.setState({ processing: true });
-  
+    
+    const selectedIndices = selectedColumns.map((col) => columnButtons.indexOf(col));
+    if (selectedIndices.includes(-1)) {
+      message.warning('选中的列包含无效项');
+      return;
+    }
+
     HttpUtil.postData(ApiUtil.API_DATA_FILE_PROCESS, {
-      file_paths: this.state.fileList.map((file) => file.name),
+      file_paths: fileList.map((file) => file.name),
+      selected_indices: selectedIndices,
     })
       .then((response) => {
         if (response.code >= 0) {
@@ -129,7 +151,7 @@ handleClearCache = () => {
   
 
   render() {
-    const { fileList, processing} = this.state;
+    const { fileList, processing, columnButtons, selectedColumns} = this.state;
 
     return (
       <div style={{ marginTop: 24 }}>
@@ -154,6 +176,16 @@ handleClearCache = () => {
         >
           上传文件
         </Button>
+
+        {/* 选择列 */}
+        <div style={{ marginTop: 16 }}>
+          <Checkbox.Group
+            options={columnButtons}
+            value={selectedColumns}
+            onChange={this.handleColumnChange}
+          />
+          <Checkbox value="姓名" disabled checked={selectedColumns.includes('姓名')} style={{ display: 'none' }} />
+        </div>
 
         {/* 文件列表 */}
         <List

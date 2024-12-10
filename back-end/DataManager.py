@@ -15,11 +15,15 @@ def delete_file(file_paths, selected_files):
     for file in selected_files:
         file_paths.remove(file)
     return file_paths
+ 
 
 
-
-def process_data(file_paths):
-    required_columns = ['姓名', '基本工资', '岗位工资', '工龄工资', '考核工资', '预发效益', '加班工资', '补发', '应发工资']
+def process_data(file_paths, selected_columns):
+    # 提供的列索引映射为列名（你可以选择列名作为动态传递的参数）
+    column_buttons = ['姓名', '基本工资', '岗位工资', '工龄工资', '考核工资', '预发效益', '加班工资', '补发', '应发工资',  '医疗保险', '失业保险', '住房公积金', '工会费',  '其他扣除',  '个人所得税',  '实发工资']
+    
+    # 使用 selected_columns 来获取列名
+    required_columns = [column_buttons[i] for i in selected_columns]
 
     all_data = []
     for file_path in file_paths:

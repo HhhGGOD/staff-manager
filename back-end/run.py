@@ -56,7 +56,7 @@ def updateJob():
 @app.route(apiPrefix + 'deleteJob/<int:id>')
 def deleteJob(id):
     re = DBUtil.deleteJob(id)
-    print(re)
+    # print(re)
     return re
 
 
@@ -76,7 +76,7 @@ def updateCompany():
 @app.route(apiPrefix + 'deleteCompany/<int:id>', methods=['DELETE'])
 def deleteCompany(id):
     re = DBUtil.deleteCompany(id)
-    print(re)
+    # print(re)
     return re
 
 @app.route(apiPrefix + 'getCompanyDetails/<int:id>', methods=['GET'])
@@ -121,7 +121,7 @@ def deleteStaff(id):
 @app.route(apiPrefix + 'searchStaff')
 def searchStaff():
     data = request.args.get('where')
-    print("searchStaff:", data)
+    # print("searchStaff:", data)
     where = json.loads(data)
     array = DBUtil.searchStaff(where)
     jsonStaffs = DBUtil.getStaffsFromData(array)
@@ -231,15 +231,21 @@ def api_delete_files():
 
 @app.route(apiPrefix + '/processFiles', methods=['POST'])
 def process_files():
+    data = request.get_json()
     file_paths = [os.path.join('uploadsData', filename) 
                   for filename in os.listdir('uploadsData') 
                   if filename.endswith(('.xlsx', '.xls'))]
+    
+    selected_indices = data['selected_indices']
 
+    merged_data = process_data(file_paths, selected_indices)
+    print(f"接收到的选中列索引: {selected_indices}")
+    
     if not file_paths:
         return jsonify({'code': -1, 'message': '没有找到可处理的文件'}), 400
 
     # 处理文件
-    merged_data = process_data(file_paths)
+    merged_data = process_data(file_paths, selected_indices)
     if merged_data is None:
         return jsonify({'code': -1, 'message': '没有有效数据'}), 400
 
