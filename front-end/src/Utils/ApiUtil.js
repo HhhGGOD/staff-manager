@@ -32,4 +32,5 @@ export default class ApiUtil {
     static API_DATA_FILE_UPLOAD = ApiUtil.URL_ROOT + '/uploadFiles';
     static API_DATA_FILE_DELETE = ApiUtil.URL_ROOT + '/deleteFiles/';
     static API_DATA_FILE_PROCESS = ApiUtil.URL_ROOT + '/processFiles';
+    static API_DATA_CLEAR_CACHE = ApiUtil.URL_ROOT + '/clearCache';
 }

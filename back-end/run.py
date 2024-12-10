@@ -9,6 +9,7 @@ import SqliteUtil as DBUtil
 import json
 import FileUtil
 import pandas as pd
+import shutil
 from io import BytesIO
 from DataManager import import_files_from_folder, delete_file, process_data, save_to_excel
 from werkzeug.utils import secure_filename
@@ -19,14 +20,9 @@ import os
 # 定义保存输出文件的目录
 OUTPUT_DIR = 'output'
 
-# Flask初始化参数尽量使用你的包名，这个初始化方式是官方推荐的，官方解释：http://flask.pocoo.org/docs/0.12/api/#flask.Flask
-'''
-    template_folder 模板文件所在的目录
-    static_folder 静态文件根目录（图片、css、js等）
-    static_url_path url访问时根目录对应的path，可以自己改，映射到static_folder。和package.json里的homepage对应
-'''
+
 #app = Flask(__name__, static_folder="templates",static_url_path="/staff-manager")
-app = Flask(__name__, template_folder='front-end', static_folder="front-end", static_url_path="/staff-manager")
+app = Flask(__name__, template_folder='front-end', static_folder="output", static_url_path="/staff-manager")
 
 
 # hello
@@ -201,7 +197,7 @@ def upload_files():
         # print(f"文件大小: {len(file.read())} bytes")
         
         # 将文件保存到服务器
-        file.seek(0)  # 重置文件指针到文件开头
+        file.seek(0)  
         filename = secure_filename(file.filename)
         save_path = os.path.join('uploadsData', filename)
         
@@ -238,8 +234,6 @@ def process_files():
     file_paths = [os.path.join('uploadsData', filename) 
                   for filename in os.listdir('uploadsData') 
                   if filename.endswith(('.xlsx', '.xls'))]
-    # print("uploadsData 文件夹内容:", os.listdir('uploadsData'))
-    # print("上传文件夹路径:", os.path.abspath('uploadsData'))
 
     if not file_paths:
         return jsonify({'code': -1, 'message': '没有找到可处理的文件'}), 400
@@ -250,14 +244,53 @@ def process_files():
         return jsonify({'code': -1, 'message': '没有有效数据'}), 400
 
     # 保存合并后的数据
+    # output_file_name = 'processed_data.xlsx'
     output_file_path = 'output/processed_data.xlsx'
+
+    # if os.path.exists(output_file_path):
+    #     print("文件存在:", output_file_path)
+    # else:
+    #     print("文件不存在:", output_file_path)
+
     success = save_to_excel(merged_data, output_file_path)
 
     if success:
-        return jsonify({'code': 0, 'message': '数据处理成功'}), 200
+        # 返回文件的下载链接
+        download_url = '/static/processed_data.xlsx'
+        return jsonify({
+            'code': 0,
+            'message': '数据处理成功',
+            'data': {
+                'download_link': download_url  # 直接返回下载链接
+            }
+        }), 200
     else:
         return jsonify({'code': -1, 'message': '保存文件失败'}), 500
 
+
+@app.route('/downloadProcessedFile', methods=['GET'])
+def download_processed_file():
+    file_path = os.path.join('output', 'processed_data.xlsx')
+    if os.path.exists(file_path):
+        return send_from_directory(directory='output', path='processed_data.xlsx', as_attachment=True)
+    else:
+        return jsonify({'code': -1, 'message': '文件不存在'}), 404
+
+
+@app.route(apiPrefix + '/clearCache', methods=['POST'])
+def clear_cache():
+    folder_path = 'uploadsData'
+    
+    # 删除 uploadsData 目录下的所有文件
+    try:
+        for filename in os.listdir(folder_path):
+            file_path = os.path.join(folder_path, filename)
+            if os.path.isfile(file_path):
+                os.remove(file_path)
+        
+        return jsonify({'code': 0, 'message': '缓存已清除'}), 200
+    except Exception as e:
+        return jsonify({'code': -1, 'message': f'无法清除缓存: {str(e)}'}), 500
 
 
 # if __name__ == '__main__': 确保服务器只会在该脚本被 Python 解释器直接执行的时候才会运行，而不是作为模块导入的时候。

@@ -16,7 +16,7 @@ export default class DataManager extends React.Component {
   // 读取文件夹中的所有文件
   handleFolderChange = (event) => {
     const files = event.target.files;
-    console.log('Selected files:', files);  // 打印文件列表
+    // console.log('Selected files:', files);  // 打印文件列表
     
     if (files.length === 0) {
       message.warning('没有选择任何文件');
@@ -39,7 +39,7 @@ export default class DataManager extends React.Component {
       return;
     }
 
-    console.log('Files to be uploaded:', fileList);
+    // console.log('Files to be uploaded:', fileList);
 
     // 选择多个文件上传
     const formData = new FormData();
@@ -65,24 +65,53 @@ export default class DataManager extends React.Component {
     message.info(`文件 "${fileName}" 已从列表中移除`);
   };
 
+
+// 清理缓存方法
+handleClearCache = () => {
+  HttpUtil.postData(ApiUtil.API_DATA_CLEAR_CACHE)  // 假设后端清除缓存接口路径为 `API_DATA_CLEAR_CACHE`
+    .then((response) => {
+      if (response.code >= 0) {
+        message.success('缓存清除成功');
+        
+        // 清空前端文件列表
+        this.setState({ fileList: [] });
+      } else {
+        message.error(response.message || '清除缓存失败');
+      }
+    })
+    .catch((error) => {
+      message.error(error.message || '清除缓存失败');
+    });
+};
+  
+
   // 处理数据（处理整个文件夹中的文件）
-  handleProcess = () => {
+  handleProcess = (event) => {
+    event.preventDefault();  // 确保阻止默认的表单提交行为
+    
     if (this.state.fileList.length === 0) {
       message.warning('请先上传文件');
       return;
     }
-
+  
     this.setState({ processing: true });
-
+  
     HttpUtil.postData(ApiUtil.API_DATA_FILE_PROCESS, {
       file_paths: this.state.fileList.map((file) => file.name),
     })
       .then((response) => {
         if (response.code >= 0) {
-          this.setState({
-            showDownload: true,
-            downloadUrl: response.data.output_file_path, // 假设返回的是下载文件的 URL
-          });
+          const downloadLink = response.data.download_link;
+          console.log('下载链接:', downloadLink);
+  
+          // 创建一个临时的 <a> 标签来触发下载
+          const link = document.createElement('a');
+          window.location.href = 'http://localhost:5000/downloadProcessedFile';
+
+          document.body.appendChild(link);
+          link.click();  
+          document.body.removeChild(link);  
+          
           message.success('数据处理成功');
         } else {
           message.error('数据处理失败');
@@ -95,18 +124,12 @@ export default class DataManager extends React.Component {
         this.setState({ processing: false });
       });
   };
-
-  // 下载文件
-  handleDownload = () => {
-    if (this.state.downloadUrl) {
-      window.location.href = this.state.downloadUrl;
-    } else {
-      message.warning('下载链接不存在');
-    }
-  };
+  
+  
+  
 
   render() {
-    const { fileList, processing, showDownload } = this.state;
+    const { fileList, processing} = this.state;
 
     return (
       <div style={{ marginTop: 24 }}>
@@ -159,22 +182,20 @@ export default class DataManager extends React.Component {
           type="primary"
           onClick={this.handleProcess}
           disabled={fileList.length === 0 || processing}
+          htmlType="button"  // 确保按钮的类型是 "button" 而不是 "submit"
         >
           {processing ? <Spin size="small" /> : '处理数据'}
         </Button>
 
-        {/* 下载按钮 */}
-        {showDownload && (
-          <Button
-            type="primary"
-            icon="download"
-            href={this.state.downloadUrl}
-            style={{ marginLeft: 24 }}
-            onClick={this.handleDownload}
-          >
-            下载数据
-          </Button>
-        )}
+
+
+        <Button
+          type="danger"
+          onClick={this.handleClearCache}
+          style={{ marginLeft: 16 }}
+        >
+          清除缓存
+        </Button>
 
         <Collapse style={{ marginTop: 24 }}>
           <Collapse.Panel header="查看文件示例" key="1">
@@ -184,9 +205,9 @@ export default class DataManager extends React.Component {
                 src={exampleImage}
                 alt="excel示例"
                 style={{
-                  maxWidth: '100%', // 限制宽度为容器的100%
-                  maxHeight: '80vh', // 限制高度为视口的80%
-                  objectFit: 'contain', // 确保图片内容不被裁剪
+                  maxWidth: '100%', 
+                  maxHeight: '80vh', 
+                  objectFit: 'contain', 
                   cursor: 'pointer',
                 }}
                 onClick={() => window.open(exampleImage, "_blank")} // 点击图片打开新窗口
