@@ -19,7 +19,6 @@ def delete_file(file_paths, selected_files):
 
 
 def process_data(file_paths, selected_columns):
-    # 提供的列索引映射为列名（你可以选择列名作为动态传递的参数）
     column_buttons = ['姓名', '基本工资', '岗位工资', '工龄工资', '考核工资', '预发效益', '加班工资', '补发', '应发工资',  '医疗保险', '失业保险', '住房公积金', '工会费',  '其他扣除',  '个人所得税',  '实发工资']
     
     # 使用 selected_columns 来获取列名
@@ -31,39 +30,32 @@ def process_data(file_paths, selected_columns):
             # 确保文件路径正确，拼接上传目录
             full_file_path = os.path.join(file_path)
             
-            # 检查文件是否存在，避免路径问题
             if not os.path.exists(full_file_path):
                 print(f"文件不存在: {full_file_path}")
                 continue
-            
-            # 使用 with 语句自动管理 Excel 文件打开和关闭
+
             with pd.ExcelFile(full_file_path) as xls:
-                # 查找包含“工资发放”关键词的工作表
                 selected_sheets = [sheet for sheet in xls.sheet_names if "工资发放" in sheet]
                 if not selected_sheets:
-                    continue  # 如果没有找到符合的工作表，跳过
+                    continue  
 
-                # 获取第一个符合条件的工作表
                 sheet_name = selected_sheets[0]
                 df = pd.read_excel(xls, sheet_name=sheet_name, header=3)
 
-                # 确保所需列在 DataFrame 中
                 available_columns = [col for col in df.columns if col in required_columns]
-                df = df[available_columns]  # 只保留需要的列
+                df = df[available_columns]  
 
-                # 删除姓名为空的行，并过滤掉非中文字符的姓名
                 df = df.dropna(subset=['姓名'])
                 df = df[df['姓名'].apply(lambda x: isinstance(x, str) and all(u'\u4e00' <= c <= u'\u9fff' for c in x))]
 
-                # 添加空行作为填充
                 empty_rows = pd.DataFrame([[''] * len(df.columns)] * 2, columns=df.columns)
                 df = pd.concat([df, empty_rows], ignore_index=True, sort=False)
 
-                all_data.append(df)  # 将每个文件的处理结果添加到列表中
+                all_data.append(df)  
 
         except Exception as e:
             print(f"处理文件 {file_path} 时发生错误: {e}")
-            continue  # 如果处理出错，跳过此文件并继续
+            continue  
 
     if all_data:
         merged_data = pd.concat(all_data, ignore_index=True)
@@ -72,11 +64,12 @@ def process_data(file_paths, selected_columns):
         return None  # 如果没有有效的数据，返回 None
 
 
-def save_to_excel(dataframe, output_path):
+def save_to_excel(data, output_path):
     try:
-        # 创建 output 文件夹（如果不存在）
-        os.makedirs(os.path.dirname(output_path), exist_ok=True)
-        dataframe.to_excel(output_path, index=False)
+        with pd.ExcelWriter(output_path, engine='openpyxl') as writer:
+            data.to_excel(writer, index=False, sheet_name='ProcessedData')
+            worksheet = writer.sheets['ProcessedData']
+            worksheet.freeze_panes = 'A2'  # 冻结第一行
         return True
     except Exception as e:
         print(f"保存文件时发生错误: {e}")

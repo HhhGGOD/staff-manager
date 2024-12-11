@@ -14,7 +14,7 @@
     "redux-thunk": "^2.3.0"
   },
   "scripts": {
-    "start": "HOST=0.0.0.0 react-scripts start",
+    "start": "react-scripts start",
     "prebuild-linux": "rm -rf ../back-end/templates",
     "prebuild": "if exist ..\\back-end\\front-build (rmdir ..\\back-end\\front-build /q/s)",
     "build": "react-scripts build",

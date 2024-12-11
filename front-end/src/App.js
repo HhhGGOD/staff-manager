@@ -71,7 +71,7 @@ class App extends Component {
             </Menu.Item>
             <Menu.Item key="4">
               <Icon type="database" />
-              <span>数据处理</span>
+              <span>数据筛选</span>
             </Menu.Item>
           </Menu>
         </Sider>

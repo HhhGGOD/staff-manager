@@ -1,15 +1,10 @@
-#! /usr/bin/env python
-# -*- coding: utf-8 -*-
-# 使用flask提供restful接口
-# 先安装依赖：pip install flask
-
 from flask import Flask, render_template, request, send_from_directory, jsonify
 import os
 import SqliteUtil as DBUtil
 import json
 import FileUtil
 import pandas as pd
-from io import BytesIO
+# from io import BytesIO
 from DataManager import import_files_from_folder, delete_file, process_data, save_to_excel
 from werkzeug.utils import secure_filename
 from flask_cors import CORS
@@ -239,7 +234,7 @@ def process_files():
     
     selected_indices = data['selected_indices']
 
-    merged_data = process_data(file_paths, selected_indices)
+
     print(f"接收到的选中列索引: {selected_indices}")
 
     if not file_paths:

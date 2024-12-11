@@ -399,7 +399,7 @@ def getCompanyList():
         
         # 直接使用静态表名，避免拼接
         sql = "select id, name, detail from t_company"
-        print(sql)  # 打印查询语句用于调试
+        # print(sql)  # 打印查询语句用于调试
         cursor.execute(sql)
         companies = cursor.fetchall()
         # 检查是否获取到数据
@@ -413,7 +413,7 @@ def getCompanyList():
                 'name': company[1],
                 'detail': company[2],
             })
-        print(result)
+        # print(result)
         return json.dumps(result)
     except Exception as e:
         print(f"Error: {str(e)}")
@@ -450,7 +450,7 @@ def addOrUpdateCompany(json_str):
             cursor.execute(sql, values)
             conn.commit()
             message = '公司更新成功'
-            print(cursor.rowcount,message)
+            # print(cursor.rowcount,message)
 
         conn.close()  # 关闭连接
         re = {
@@ -470,7 +470,7 @@ def addOrUpdateCompany(json_str):
 def deleteCompany(id):
     try:
         sql = "delete from t_company where id=%d" % (id)
-        print(sql)
+        # print(sql)
         cursor.execute(sql)
         conn.commit()
         re = {
@@ -490,7 +490,7 @@ def deleteCompany(id):
 def getCompanyDetails(id):
     try:
         sql = "SELECT id, name, detail FROM t_company WHERE id = %s"
-        print(sql % id)
+        # print(sql % id)
         cursor.execute(sql, (id,))
         company = cursor.fetchone()
 
@@ -504,5 +504,5 @@ def getCompanyDetails(id):
         else:
             return json.dumps({'code': -1, 'message': '公司未找到'})
     except Exception as e:
-        print(str(e))
+        # print(str(e))
         return json.dumps({'code': -1, 'message': str(e)})
