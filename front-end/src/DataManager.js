@@ -13,7 +13,8 @@ export default class DataManager extends React.Component {
     downloadUrl: '', // 下载链接
     fileUploaded: false,
     selectedColumns: ['姓名'], // 姓名列默认选中并固定
-    columnButtons: ['姓名', '基本工资', '岗位工资', '工龄工资', '考核工资', '预发效益', '加班工资', '补发', '应发工资',  '医疗保险', '失业保险', '住房公积金', '工会费',  '其他扣除',  '个人所得税',  '实发工资'],
+    columnButtons: ['姓名', '基本工资', '岗位工资', '工龄工资', '考核工资', '预发效益', '加班工资', '补发', '应发工资', 
+     '医疗保险', '失业保险', '住房公积金', '工会费',  '其他扣除',  '个人所得税',  '实发工资'],
   };
 
   // 读取文件夹中的所有文件
@@ -72,7 +73,7 @@ export default class DataManager extends React.Component {
 
 // 清理缓存方法
 handleClearCache = () => {
-  HttpUtil.postData(ApiUtil.API_DATA_CLEAR_CACHE)  // 假设后端清除缓存接口路径为 `API_DATA_CLEAR_CACHE`
+  HttpUtil.postData(ApiUtil.API_DATA_CLEAR_CACHE)  
     .then((response) => {
       if (response.code >= 0) {
         message.success('缓存清除成功');
@@ -98,46 +99,73 @@ handleClearCache = () => {
   // 处理数据（处理整个文件夹中的文件）
   handleProcess = (event) => {
     event.preventDefault();  // 确保阻止默认的表单提交行为
-
+  
     const { selectedColumns, fileList, columnButtons } = this.state;
-
+  
     if (fileList.length === 0) {
       message.warning('请先上传文件');
       return;
     }
-    
+  
     if (selectedColumns.length === 1) {
       message.warning('请选择至少一个列');
       return;
     }
-
+  
     this.setState({ processing: true });
-    
+  
     const selectedIndices = selectedColumns.map((col) => columnButtons.indexOf(col));
     if (selectedIndices.includes(-1)) {
       message.warning('选中的列包含无效项');
       return;
     }
-
+  
+    // 向后端发送数据处理请求
     HttpUtil.postData(ApiUtil.API_DATA_FILE_PROCESS, {
       file_paths: fileList.map((file) => file.name),
       selected_indices: selectedIndices,
     })
       .then((response) => {
         if (response.code >= 0) {
+          // 获取下载链接
           const downloadLink = response.data.download_link;
           console.log('下载链接:', downloadLink);
   
-          // 创建一个临时的 <a> 标签来触发下载
-          const link = document.createElement('a');
-          window.location.href = 'http://localhost:5000/downloadProcessedFile';
-
-          document.body.appendChild(link);
-          link.click();  
-          document.body.removeChild(link);  
-          
+          // 使用 fetch 下载文件
+          fetch(downloadLink, {
+            method: 'GET',
+            headers: {
+              'upgrade-insecure-requests': '1'
+            },
+            referrer: 'http://192.168.1.64:3000/',
+            referrerPolicy: 'strict-origin-when-cross-origin',
+            mode: 'cors',
+            credentials: 'omit',
+          })
+            .then((response) => {
+              if (response.ok) {
+                return response.blob();  // 处理文件为 Blob 格式
+              } else {
+                throw new Error('文件下载失败');
+              }
+            })
+            .then((blob) => {
+              // 创建临时链接触发下载
+              const link = document.createElement('a');
+              const url = window.URL.createObjectURL(blob);
+              link.href = url;
+              link.download = 'processed_data.xlsx';  // 设置下载的文件名
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
+              window.URL.revokeObjectURL(url);  // 释放对象 URL
+            })
+            .catch((error) => {
+              message.error('下载文件时发生错误: ' + error.message);
+            });
+  
+          // 清除缓存
           this.handleClearCache();
-
           message.success('数据处理成功');
         } else {
           message.error('数据处理失败');
@@ -149,7 +177,6 @@ handleClearCache = () => {
       .finally(() => {
         this.setState({ processing: false });
       });
-      
   };
   
   

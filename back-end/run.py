@@ -8,6 +8,8 @@ import pandas as pd
 from DataManager import import_files_from_folder, delete_file, process_data, save_to_excel
 from werkzeug.utils import secure_filename
 from flask_cors import CORS
+from waitress import serve
+# from run import app
 
 
 upload_root_dir = 'uploads'
@@ -19,7 +21,7 @@ OUTPUT_DIR = 'output'
 
 #app = Flask(__name__, static_folder="templates",static_url_path="/staff-manager")
 app = Flask(__name__, template_folder='front-end', static_folder="output", static_url_path="/staff-manager")
-CORS(app, origins="http://localhost:3000")
+CORS(app, origins="http://192.168.1.64:3000")
 
 # hello
 @app.route('/hello')
@@ -225,7 +227,7 @@ def api_delete_files():
 
 # 处理文件接口
 
-@app.route(apiPrefix + '/processFiles', methods=['POST'])
+@app.route(apiPrefix + 'processFiles', methods=['POST'])
 def process_files():
     data = request.get_json()
     file_paths = [os.path.join('uploadsData', filename) 
@@ -258,7 +260,7 @@ def process_files():
 
     if success:
         # 返回文件的下载链接
-        download_url = '/static/processed_data.xlsx'
+        download_url = '/staff-manager/processed_data.xlsx'
         return jsonify({
             'code': 0,
             'message': '数据处理成功',
@@ -273,10 +275,19 @@ def process_files():
 @app.route('/downloadProcessedFile', methods=['GET'])
 def download_processed_file():
     file_path = os.path.join('output', 'processed_data.xlsx')
+    print(f"访问下载路径: {file_path}")
     if os.path.exists(file_path):
-        return send_from_directory(directory='output', path='processed_data.xlsx', as_attachment=True)
+        # print("文件存在，返回下载响应")
+        response = send_from_directory(directory='output', path='processed_data.xlsx', as_attachment=True)
+        response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+        response.headers['Pragma'] = 'no-cache'
+        response.headers['Expires'] = '0'
+        return response
     else:
+        print("文件不存在")
         return jsonify({'code': -1, 'message': '文件不存在'}), 404
+
+
 
 
 @app.route(apiPrefix + '/clearCache', methods=['POST'])
@@ -295,9 +306,7 @@ def clear_cache():
         return jsonify({'code': -1, 'message': f'无法清除缓存: {str(e)}'}), 500
 
 
-# if __name__ == '__main__': 确保服务器只会在该脚本被 Python 解释器直接执行的时候才会运行，而不是作为模块导入的时候。
 if __name__ == "__main__":
-    # 如果不限于本机使用：app.run(host='0.0.0.0')
-    # 调试模式，修改文件之后自动更新重启。
-    app.run(host='0.0.0.0', port=5000)
+    print("Starting the server...")
+    serve(app, host='0.0.0.0', port=5000)
 

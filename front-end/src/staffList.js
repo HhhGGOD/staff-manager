@@ -75,11 +75,12 @@ class StaffList extends React.Component {
     }, {
         title: '地址',
         dataIndex: 'address',
+        align: 'center',
     }, {
         title: '公司',
         dataIndex: 'company',
         key: 'company',
-        render: (companyName) => { // 将companyId改为companyName
+        render: (companyName) => { 
             // console.log('CompanyName:', companyName); // 调试：打印出当前的公司名称
             return <span>{companyName ? companyName : '公司信息未选择'}</span>;
         },
@@ -277,7 +278,7 @@ class StaffList extends React.Component {
                     <Select style={{ width: 160, marginRight: 20, marginTop: 4 }} value={this.state.jobSelected} onChange={(value) => this.handleFilterChange(value, 'job')}>
                         {this.state.mJobs.map((item) => <Select.Option value={item.id} key={item.id + ''}>{item.id > 0 ? item.name : '所有职位'}</Select.Option>)}
                     </Select>
-                    <Select style={{ width: 160, marginRight: 20, marginTop: 4 }} value={this.state.companySelected} onChange={(value) => this.handleFilterChange(value, 'company')}>
+                    <Select style={{ width: 300, marginRight: 20, marginTop: 4 }} value={this.state.companySelected} onChange={(value) => this.handleFilterChange(value, 'company')}>
                         {this.state.mcompanies.map((item) => <Select.Option value={item.id} key={item.id + ''}>{item.id > 0 ? item.name : '所有公司'}</Select.Option>)}
                     </Select>
                     <Input placeholder="地址" item="address" prefix={<Icon type="home" style={styles.prefixIcon} />} style={styles.searchItem} onChange={this.handleTextChange} />

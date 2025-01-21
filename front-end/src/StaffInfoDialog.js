@@ -243,7 +243,7 @@ class StaffInfoDialog extends React.Component {
               {getFieldDecorator('company', {
                 initialValue: staff.companyId, // 默认选择当前员工的公司ID
               })(
-                <Select style={{ width: 140 }} >
+                <Select style={{ width: 300 }} >
                   {CommonValues.COMPANIES.map((item) => (
                     <Select.Option value={item.id} key={item.id}>
                       {item.name}
@@ -380,7 +380,15 @@ const mForm = Form.create({
       job: Form.createFormField({ value: staff.job }),
       company: Form.createFormField({ value: staff.companyId }), // 使用公司ID
       education: Form.createFormField({ value: staff.education }),
-      // 其他字段...
+      birth_year: Form.createFormField({ value: staff.birth_year }), 
+      hometown: Form.createFormField({ value: staff.hometown }), 
+      address: Form.createFormField({ value: staff.address }), 
+      phone: Form.createFormField({ value: staff.phone }), 
+      email: Form.createFormField({ value: staff.email }), 
+      qq: Form.createFormField({ value: staff.qq }), 
+      wechat: Form.createFormField({ value: staff.wechat }),
+      experience: Form.createFormField({ value: staff.experience }),
+      contact_logs: Form.createFormField({ value: staff.contact_logs }),
     };
   },
 })(StaffInfoDialog);
